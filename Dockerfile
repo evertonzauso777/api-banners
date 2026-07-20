@@ -15,11 +15,10 @@ RUN go mod download
 COPY . .
 
 # Build dos binarios
-RUN go build -o api ./main.go
-RUN mkdir -p /app/bin && go build -o /app/bin/worker ./cmd/worker
+RUN go build -o ./main.go
 
 # Expor a porta que a aplicação usa
 EXPOSE 8080
 
 # Comando para executar a aplicação
-CMD ["./api"]
+CMD ["./main"]

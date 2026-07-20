@@ -15,11 +15,7 @@ class DockerDeployer:
         self.dockerhub_username = dockerhub_username
         self.dockerhub_password = dockerhub_password
         self.repository_name = repository_name
-        self.deployment_paths = [
-            Path("pipeline") / item.strip()
-            for item in path.split(",")
-            if item.strip()
-        ]
+        self.deployment_file = f"pipeline/{path}/deployment.yaml"
 
     def run_command(self, command, check=True):
         """Executa um comando shell no Linux."""
@@ -45,19 +41,8 @@ class DockerDeployer:
             print("ERRO: Dockerfile não encontrado!")
             sys.exit(1)
 
-        if not self.deployment_paths:
-            print("ERRO: PATH_DEPLOYMENT está vazio.")
-            sys.exit(1)
-
-        missing_paths = [str(path) for path in self.deployment_paths if not path.exists()]
-        if missing_paths:
-            print(f"ERRO: Caminhos de deployment não encontrados: {', '.join(missing_paths)}")
-            sys.exit(1)
-
-        deployment_files = self.find_deployment_files()
-        if not deployment_files:
-            checked_paths = ", ".join(str(path) for path in self.deployment_paths)
-            print(f"ERRO: Nenhum deployment.yaml encontrado em: {checked_paths}")
+        if not Path(self.deployment_file).exists():
+            print(f"ERRO: Arquivo de deployment não encontrado: {self.deployment_file}")
             sys.exit(1)
 
         # Verifica se o Docker está instalado
@@ -149,47 +134,30 @@ class DockerDeployer:
         # Mantida aqui por compatibilidade, mas desativada por padrão.
         pass
 
-    def find_deployment_files(self):
-        """Busca arquivos deployment.yaml nos caminhos configurados."""
-        deployment_files = []
+    def update_deployment(self, image_name):
+        """Atualiza o deployment.yaml com a nova tag de imagem."""
+        print(f"Atualizando arquivo de deployment: {self.deployment_file}")
 
-        for base_path in self.deployment_paths:
-            if base_path.is_file() and base_path.name == "deployment.yaml":
-                deployment_files.append(base_path)
-                continue
+        # Backup
+        backup_file = f"{self.deployment_file}.backup"
+        content = Path(self.deployment_file).read_text()
+        Path(backup_file).write_text(content)
+        print(f"Backup criado: {backup_file}")
 
-            deployment_files.extend(sorted(base_path.rglob("deployment.yaml")))
-
-        unique_files = sorted(set(deployment_files))
-        return unique_files
-
-    def update_deployments(self, image_name):
-        """Atualiza todos os deployment.yaml com a nova tag de imagem."""
-        deployment_files = self.find_deployment_files()
-        pattern = rf"image:\s*{re.escape(self.dockerhub_username)}/{re.escape(self.repository_name)}:[^\s]+"
+        # Substitui a linha da imagem
+        pattern = rf"image:\s*{re.escape(self.dockerhub_username)}/{re.escape(self.repository_name)}:.+"
         replacement = f"image: {image_name}"
+        new_content = re.sub(pattern, replacement, content, count=1)
 
-        updated_files = 0
+        # Salva
+        Path(self.deployment_file).write_text(new_content)
+        print("✓ Arquivo deployment.yaml atualizado com sucesso!")
 
-        for deployment_file in deployment_files:
-            print(f"Atualizando arquivo de deployment: {deployment_file}")
-
-            content = deployment_file.read_text()
-            backup_file = Path(f"{deployment_file}.backup")
-            backup_file.write_text(content)
-            print(f"Backup criado: {backup_file}")
-
-            new_content, replacements = re.subn(pattern, replacement, content)
-            deployment_file.write_text(new_content)
-
-            if replacements > 0:
-                print(f"✓ Imagem atualizada em {deployment_file} ({replacements} ocorrência(s))")
-                updated_files += 1
-            else:
-                print(f"⚠️ Nenhuma imagem correspondente encontrada em {deployment_file}")
-
-        if updated_files == 0:
-            print("ERRO: A imagem não foi encontrada em nenhum deployment.yaml")
+        # Validação
+        if image_name in new_content:
+            print("✓ Verificação: Imagem atualizada corretamente no YAML")
+        else:
+            print("ERRO: A imagem não foi encontrada após atualização")
             sys.exit(1)
 
     def run(self):
@@ -206,12 +174,12 @@ class DockerDeployer:
 
         image_name = self.build_image(version)
         # Nota: push já feito via --push no buildx
-        self.update_deployments(image_name)
+        self.update_deployment(image_name)
 
         print("=" * 60)
         print("✅ Processo concluído com sucesso!")
         print(f"📦 Imagem: {image_name}")
-        print(f"📝 Caminhos atualizados: {', '.join(str(path) for path in self.deployment_paths)}")
+        print(f"📝 Arquivo atualizado: {self.deployment_file}")
         print("=" * 60)
 
 
@@ -219,7 +187,7 @@ if __name__ == "__main__":
     DOCKERHUB_USERNAME = os.getenv("DOCKERHUB_USERNAME")
     DOCKERHUB_PASSWORD = os.getenv("DOCKERHUB_PASSWORD")
     REPOSITORY_NAME = os.getenv("REPOSITORY_NAME", "api-savings-arm64")
-    PATH_DEPLOYMENT = os.getenv("PATH_DEPLOYMENT", "k8s,worker")
+    PATH_DEPLOYMENT = os.getenv("PATH_DEPLOYMENT", "k8s/api")
 
     if not DOCKERHUB_USERNAME or not DOCKERHUB_PASSWORD:
         print("ERRO: Variáveis DOCKERHUB_USERNAME e DOCKERHUB_PASSWORD são obrigatórias.")
