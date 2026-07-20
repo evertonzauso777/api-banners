@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build dos binarios
-RUN go build -o ./main.go
+RUN go build -o main .
 
 # Expor a porta que a aplicação usa
 EXPOSE 8080

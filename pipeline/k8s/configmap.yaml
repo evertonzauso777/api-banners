@@ -11,3 +11,6 @@ data:
   DB_NAME: "zausoeventosdb"
   DB_SSLMODE: "disable"
   RABBITMQ_URL: "amqps://phbdxjqp:WUe00zLAlRW2jSHcgFw1VgD-10SFZGQv@moose.rmq.cloudamqp.com/phbdxjqp"
+  B2_APPLICATION_KEY_ID: "bbc9a19e8d15"
+  B2_APPLICATION_KEY: "005920dbd41fff3827499ac3064d5c48c62da874a2"
+  B2_BUCKET_NAME: "zauso-dev-files"
