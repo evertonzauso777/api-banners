@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: api-events-config
+  name: api-banners-config
   namespace: api
 data:
   DB_HOST: "100.103.102.43"
