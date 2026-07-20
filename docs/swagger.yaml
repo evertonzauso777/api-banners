@@ -1,0 +1,120 @@
+basePath: /
+definitions:
+  models.Banners:
+    properties:
+      ativo:
+        type: boolean
+      data_criacao:
+        type: string
+      id_banner:
+        type: integer
+      id_evento:
+        type: integer
+      imagem:
+        type: string
+      titulo:
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: api-banners.zauso-dev.com.br
+info:
+  contact: {}
+  description: API utilizada no site tickets.zauso-dev.com.br
+  title: API Banners
+  version: "1.0"
+paths:
+  /banners:
+    get:
+      description: Retorna banners cadastrados
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Banners'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Lista banners
+      tags:
+      - Banners
+    post:
+      consumes:
+      - multipart/form-data
+      description: Cria novo banner
+      parameters:
+      - description: ID do Evento
+        in: formData
+        name: id_evento
+        required: true
+        type: integer
+      - description: Titulo do Banner
+        in: formData
+        name: titulo
+        required: true
+        type: string
+      - description: Status do banner
+        in: formData
+        name: ativo
+        type: boolean
+      - description: Imagem do banner
+        in: formData
+        name: imagem
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Banners'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Cria Banner
+      tags:
+      - Banners
+  /banners/{id}:
+    delete:
+      description: Remove banners pelo ID
+      parameters:
+      - description: ID do Banner
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Remove banners
+      tags:
+      - Banners
+swagger: "2.0"

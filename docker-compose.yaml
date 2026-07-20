@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-banners
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: "100.103.102.43"
+      DB_PORT: "5432"
+      DB_USER: "admin"
+      DB_PASSWORD: "Dioguinho@10"
+      DB_NAME: "zausoeventosdb"
+      DB_SSLMODE: "disable"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

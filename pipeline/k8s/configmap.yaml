@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-events-config
+  namespace: api
+data:
+  DB_HOST: "100.103.102.43"
+  DB_PORT: "5432"
+  DB_USER: "admin"
+  DB_PASSWORD: "Dioguinho@10"
+  DB_NAME: "zausoeventosdb"
+  DB_SSLMODE: "disable"
+  RABBITMQ_URL: "amqps://phbdxjqp:WUe00zLAlRW2jSHcgFw1VgD-10SFZGQv@moose.rmq.cloudamqp.com/phbdxjqp"
