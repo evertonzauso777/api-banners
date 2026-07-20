@@ -12,6 +12,8 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "api-banners/docs"
 )
 
 // @title API Banners
