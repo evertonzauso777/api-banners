@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api-banners
-          image: evertonzauso777/api-banners-arm64:v20260720221009
+          image: evertonzauso777/api-banners-arm64:v20260720222709
           ports:
             - containerPort: 8080
           envFrom:
